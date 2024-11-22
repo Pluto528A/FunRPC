@@ -10,6 +10,7 @@
         <option value="$PROJECT_DIR$/../provider/pom.xml" />
         <option value="$PROJECT_DIR$/provider/pom.xml" />
         <option value="$PROJECT_DIR$/fun-rpc-easy/pom.xml" />
+        <option value="$PROJECT_DIR$/fun-rpc-core/pom.xml" />
       </list>
     </option>
   </component>
