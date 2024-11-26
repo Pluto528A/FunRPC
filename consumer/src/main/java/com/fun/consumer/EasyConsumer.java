@@ -2,6 +2,7 @@ package com.fun.consumer;
 
 import com.fun.common.model.User;
 import com.fun.common.service.UserService;
+import com.fun.funrpc.RpcApplication;
 import com.fun.funrpc.proxy.ServiceProxyFactory;
 
 /**
@@ -14,6 +15,7 @@ public class EasyConsumer {
     public static void main(String[] args) {
         // 这里需要获取 UserService 的具体实现类，并实例化
         //UserService userService = new UserServiceProxy();
+        RpcApplication.init();
         UserService userService = ServiceProxyFactory.getProxy(UserService.class);
         User user = new User();
         user.setName("fun");

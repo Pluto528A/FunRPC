@@ -1,6 +1,7 @@
 package com.fun.provider;
 
 import com.fun.common.service.UserService;
+import com.fun.funrpc.RpcApplication;
 import com.fun.funrpc.registry.LocalRegistry;
 import com.fun.funrpc.server.HttpServer;
 import com.fun.funrpc.server.VertxHttpServer;
@@ -14,6 +15,7 @@ import com.fun.funrpc.server.VertxHttpServer;
 public class EasyProvider {
     public static void main(String[] args) {
 
+        RpcApplication.init();
         // 注册 rpc 服务
         LocalRegistry.register(UserService.class.getName(), UserServiceImpl.class);
 

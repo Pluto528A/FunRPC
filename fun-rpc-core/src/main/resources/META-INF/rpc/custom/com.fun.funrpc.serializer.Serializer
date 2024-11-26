@@ -1,0 +1,2 @@
+json=com.fun.funrpc.serializer.JsonSerializer
+kryo=com.fun.funrpc.serializer.KryoSerializer

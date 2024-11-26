@@ -1,5 +1,6 @@
 package com.fun.funrpc.config;
 
+import com.fun.funrpc.serializer.SerializerKeys;
 import lombok.Data;
 
 /**
@@ -30,4 +31,14 @@ public class RpcConfig {
      * 服务端端口
      */
     private Integer serverPort = 8080;
+
+    /**
+     * 序列化器
+     */
+    private String serializer = SerializerKeys.JDK;
+
+    /**
+     * 模拟调用
+     */
+    private boolean mock = false;
 }

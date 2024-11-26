@@ -1,0 +1,3 @@
+jdk=com.fun.funrpc.serializer.JdkSerializer
+hessian=com.fun.funrpc.serializer.HessianSerializer
+
