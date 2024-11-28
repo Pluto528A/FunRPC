@@ -1,5 +1,6 @@
 package com.fun.funrpc.model;
 
+import com.fun.funrpc.constant.RpcConstant;
 import com.fun.funrpc.serializer.Serializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +33,12 @@ public class RpcRequest implements Serializable {
     private String methodName;
 
     /**
-     * 参数类型
+     * 服务版本
+     */
+    private String serviceVersion = RpcConstant.DEFAULT_SERVICE_VERSION;
+
+    /**
+     * 参数类型列表
      */
     private Class<?>[] parameterTypes;
 

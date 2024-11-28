@@ -1,7 +1,12 @@
 package com.fun.funrpc;
 
+import com.fun.funrpc.config.RegistryConfig;
 import com.fun.funrpc.config.RpcConfig;
 import com.fun.funrpc.constant.RpcConstant;
+import com.fun.funrpc.registry.Registry;
+import com.fun.funrpc.registry.RegistryFactory;
+import com.fun.funrpc.serializer.Serializer;
+import com.fun.funrpc.serializer.SerializerFactory;
 import com.fun.funrpc.utils.ConfigUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +28,15 @@ public class RpcApplication {
     public static void init(RpcConfig newRpcConfig) {
         rpcConfig = newRpcConfig;
         log.info("RpcApplication init success, rpcConfig: {}", newRpcConfig.toString());
+
+        // 初始化注册中心
+        RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
+        Registry registry = RegistryFactory.getInstace(registryConfig.getRegistry());
+        registry.init(registryConfig);
+        log.info("Registry init success, registryConfig: {}", registryConfig.toString());
+
+        // 创建并注册 ShutdownHook，JVM 停止时销毁注册中心
+        Runtime.getRuntime().addShutdownHook(new Thread(registry::destroy));
     }
 
     public static void  init() {

@@ -55,6 +55,7 @@ public class SpiLoader {
 
     /**
      * 动态加载 SPI 实现类
+     * 后面还可以加上别的配置类，比如序列化器、负载均衡策略等
      */
     private static final List<Class<?>> LOAD_CLASS_LIST = Arrays.asList(Serializer.class);
 
@@ -89,7 +90,7 @@ public class SpiLoader {
         // 获取到要加载的实现类型
         Class<?> implClass = keyClassMap.get(key);
 
-        // 从实力缓存中加载指定类型的实例
+        // 从实例缓存中加载指定类型的实例
         String implClassName = implClass.getName();
         if (!instanceCache.containsKey(implClassName)) {
             try {
@@ -105,6 +106,8 @@ public class SpiLoader {
 
     /**
      * 加载 某个类型的 SPI 实现类
+     * 可以把 loadClass 换成任意想加载的类对象，获取这个资源配置文件的地址，
+     * 然后读取配置文件，动态加载这个文件中所需要的 SPI 实现类
      * @param loadClass 加载的 SPI 接口类
      * @return 键值对映射，键为 SPI 实现类的 key，值为 SPI 实现类
      */

@@ -1,16 +1,23 @@
 package com.fun.funrpc.proxy;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.fun.funrpc.RpcApplication;
+import com.fun.funrpc.config.RpcConfig;
+import com.fun.funrpc.constant.RpcConstant;
 import com.fun.funrpc.model.RpcRequest;
 import com.fun.funrpc.model.RpcResponse;
+import com.fun.funrpc.model.ServiceMetaInfo;
+import com.fun.funrpc.registry.Registry;
+import com.fun.funrpc.registry.RegistryFactory;
 import com.fun.funrpc.serializer.JdkSerializer;
 import com.fun.funrpc.serializer.Serializer;
 import com.fun.funrpc.serializer.SerializerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * 服务代理（JDK 动态代理）
@@ -30,11 +37,12 @@ public class ServiceProxy implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // 指定序列化器
 //        JdkSerializer serializer = new JdkSerializer();
-        Serializer serializer = SerializerFactory.getInstance(RpcApplication.getRpcConfig().getSerializer());
+        final Serializer serializer = SerializerFactory.getInstance(RpcApplication.getRpcConfig().getSerializer());
 
         // 调用远程服务
+        String serviceName = method.getDeclaringClass().getName();
         RpcRequest rpcRequest = RpcRequest.builder()
-                .serviceName(method.getDeclaringClass().getName())
+                .serviceName(serviceName)
                 .methodName(method.getName())
                 .parameterTypes(method.getParameterTypes())
                 .args(args)
@@ -42,15 +50,30 @@ public class ServiceProxy implements InvocationHandler {
 
         // 序列化请求
         try {
-            byte[] bodyBytes = serializer.serialize(rpcRequest);
             // 用远程服务，并反序列化结果
-            // todo 需要使用注册中心和服务发现机制解决服务地址
+            byte[] bodyBytes = serializer.serialize(rpcRequest);
+
+            // 使用注册中心和服务发现机制解决服务地址
+            RpcConfig rpcConfig = RpcApplication.getRpcConfig();
+            Registry registry = RegistryFactory.getInstace(rpcConfig.getRegistryConfig().getRegistry());
+            ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
+            serviceMetaInfo.setServiceName(serviceName);
+            serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
+            List<ServiceMetaInfo> serviceMetaInfoList = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
+            if (CollUtil.isEmpty(serviceMetaInfoList)) {
+                throw new Exception("服务地址未找到");
+            }
+
+            // todo 这里需要使用负载均衡算法，选择一个可用的服务地址
+            ServiceMetaInfo selectServiceMetaInfo = serviceMetaInfoList.get(0);
+
             byte[] result = null;
-            try (HttpResponse httpResponse = HttpRequest.post("http://localhost:8080")
+            try (HttpResponse httpResponse = HttpRequest.post(selectServiceMetaInfo.getServiceAddress())
                     .body(bodyBytes)
                     .execute()) {
                 result = httpResponse.bodyBytes();
             }
+            // 反序列化结果
             RpcResponse resResponse = serializer.deserialize(result, RpcResponse.class);
             return resResponse.getData();
         } catch (Exception e) {
