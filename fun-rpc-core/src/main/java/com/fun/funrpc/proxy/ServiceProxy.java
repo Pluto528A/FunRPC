@@ -1,6 +1,7 @@
 package com.fun.funrpc.proxy;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.fun.funrpc.RpcApplication;
@@ -9,15 +10,23 @@ import com.fun.funrpc.constant.RpcConstant;
 import com.fun.funrpc.model.RpcRequest;
 import com.fun.funrpc.model.RpcResponse;
 import com.fun.funrpc.model.ServiceMetaInfo;
+import com.fun.funrpc.protocol.*;
 import com.fun.funrpc.registry.Registry;
 import com.fun.funrpc.registry.RegistryFactory;
 import com.fun.funrpc.serializer.JdkSerializer;
 import com.fun.funrpc.serializer.Serializer;
 import com.fun.funrpc.serializer.SerializerFactory;
+import com.fun.funrpc.server.tcp.VertxTcpClient;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.net.NetClient;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.sql.SQLOutput;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 服务代理（JDK 动态代理）
@@ -65,17 +74,14 @@ public class ServiceProxy implements InvocationHandler {
             }
 
             // todo 这里需要使用负载均衡算法，选择一个可用的服务地址
-            ServiceMetaInfo selectServiceMetaInfo = serviceMetaInfoList.get(0);
+            ServiceMetaInfo selectedServiceMetaInfo = serviceMetaInfoList.get(0);
 
-            byte[] result = null;
-            try (HttpResponse httpResponse = HttpRequest.post(selectServiceMetaInfo.getServiceAddress())
-                    .body(bodyBytes)
-                    .execute()) {
-                result = httpResponse.bodyBytes();
-            }
-            // 反序列化结果
-            RpcResponse resResponse = serializer.deserialize(result, RpcResponse.class);
-            return resResponse.getData();
+            /**
+             * TcpClient 方式调用远程服务
+             */
+            // 发送 TCP 请求
+            RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo);
+            return rpcResponse.getData();
         } catch (Exception e) {
             e.printStackTrace();
         }
