@@ -7,6 +7,8 @@ import cn.hutool.http.HttpResponse;
 import com.fun.funrpc.RpcApplication;
 import com.fun.funrpc.config.RpcConfig;
 import com.fun.funrpc.constant.RpcConstant;
+import com.fun.funrpc.loadbalancer.LoadBalancer;
+import com.fun.funrpc.loadbalancer.LoadBalancerFactory;
 import com.fun.funrpc.model.RpcRequest;
 import com.fun.funrpc.model.RpcResponse;
 import com.fun.funrpc.model.ServiceMetaInfo;
@@ -25,7 +27,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.SQLOutput;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -73,8 +77,13 @@ public class ServiceProxy implements InvocationHandler {
                 throw new Exception("服务地址未找到");
             }
 
-            // todo 这里需要使用负载均衡算法，选择一个可用的服务地址
-            ServiceMetaInfo selectedServiceMetaInfo = serviceMetaInfoList.get(0);
+            // 使用负载均衡算法，选择一个可用的服务地址
+            LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+
+            // 将调用方法名（请求路径）作为负载均衡参数
+            Map<String, Object> resquestParams = new HashMap<>();
+            resquestParams.put("methodName", rpcRequest.getMethodName());
+            ServiceMetaInfo selectedServiceMetaInfo = loadBalancer.select(resquestParams, serviceMetaInfoList);
 
             /**
              * TcpClient 方式调用远程服务

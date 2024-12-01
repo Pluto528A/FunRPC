@@ -1,0 +1,3 @@
+roundRobin=com.fun.funrpc.loadbalancer.RoundRobinLoadBalancer
+random=com.fun.funrpc.loadbalancer.RandomLoadBalancer
+consistentHash=com.fun.funrpc.loadbalancer.ConsistentHashLoadBalancer

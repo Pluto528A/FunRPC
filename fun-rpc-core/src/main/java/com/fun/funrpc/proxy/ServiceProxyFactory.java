@@ -26,10 +26,7 @@ public class ServiceProxyFactory {
             return getMockProxy(serviceClass);
         }
 
-        return (T) Proxy.newProxyInstance(
-                serviceClass.getClassLoader(),
-                new Class[]{serviceClass},
-                new ServiceProxy());
+        return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class[]{serviceClass},  new ServiceProxy());
     }
 
     /**
