@@ -1,5 +1,6 @@
 package com.fun.funrpc.config;
 
+import com.fun.funrpc.fault.retry.RetryStrategyKeys;
 import com.fun.funrpc.loadbalancer.LoadBalancerKeys;
 import com.fun.funrpc.serializer.SerializerKeys;
 import lombok.Data;
@@ -52,4 +53,10 @@ public class RpcConfig {
      * 负载均衡器
      */
     private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
+
+    /**
+     * 重试策略
+     * NO：不重试
+     */
+    private String retryStrategy = RetryStrategyKeys.NO;
 }

@@ -1,0 +1,2 @@
+no=com.fun.funrpc.fault.retry.NoRetryStrategy
+fixedInterval=com.fun.funrpc.fault.retry.FixedIntervalRetryStrategy

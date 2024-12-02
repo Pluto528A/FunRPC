@@ -7,6 +7,8 @@ import cn.hutool.http.HttpResponse;
 import com.fun.funrpc.RpcApplication;
 import com.fun.funrpc.config.RpcConfig;
 import com.fun.funrpc.constant.RpcConstant;
+import com.fun.funrpc.fault.retry.RetryStrategy;
+import com.fun.funrpc.fault.retry.RetryStrategyFactory;
 import com.fun.funrpc.loadbalancer.LoadBalancer;
 import com.fun.funrpc.loadbalancer.LoadBalancerFactory;
 import com.fun.funrpc.model.RpcRequest;
@@ -88,8 +90,11 @@ public class ServiceProxy implements InvocationHandler {
             /**
              * TcpClient 方式调用远程服务
              */
+            // 使用重试机制
+            RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
             // 发送 TCP 请求
-            RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo);
+            RpcResponse rpcResponse = retryStrategy.doRetry(() ->
+                    VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo));
             return rpcResponse.getData();
         } catch (Exception e) {
             e.printStackTrace();
