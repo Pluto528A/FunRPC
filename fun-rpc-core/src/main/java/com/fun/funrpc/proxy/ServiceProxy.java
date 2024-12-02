@@ -9,6 +9,8 @@ import com.fun.funrpc.config.RpcConfig;
 import com.fun.funrpc.constant.RpcConstant;
 import com.fun.funrpc.fault.retry.RetryStrategy;
 import com.fun.funrpc.fault.retry.RetryStrategyFactory;
+import com.fun.funrpc.fault.tolerant.TolerantStrategy;
+import com.fun.funrpc.fault.tolerant.TolerantStrategyFactory;
 import com.fun.funrpc.loadbalancer.LoadBalancer;
 import com.fun.funrpc.loadbalancer.LoadBalancerFactory;
 import com.fun.funrpc.model.RpcRequest;
@@ -91,10 +93,19 @@ public class ServiceProxy implements InvocationHandler {
              * TcpClient 方式调用远程服务
              */
             // 使用重试机制
-            RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
-            // 发送 TCP 请求
-            RpcResponse rpcResponse = retryStrategy.doRetry(() ->
-                    VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo));
+            RpcResponse rpcResponse;
+
+            try {
+                RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
+                // 发送 TCP 请求
+                rpcResponse = retryStrategy.doRetry(() ->
+                        VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo));
+            } catch (Exception e) {
+                // 容错机制
+                TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(rpcConfig.getTolerantStrategy());
+                rpcResponse = tolerantStrategy.doTolerant(null, e);
+            }
+
             return rpcResponse.getData();
         } catch (Exception e) {
             e.printStackTrace();

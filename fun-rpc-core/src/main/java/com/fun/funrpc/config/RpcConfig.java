@@ -1,6 +1,7 @@
 package com.fun.funrpc.config;
 
 import com.fun.funrpc.fault.retry.RetryStrategyKeys;
+import com.fun.funrpc.fault.tolerant.TolerantStrategyKeys;
 import com.fun.funrpc.loadbalancer.LoadBalancerKeys;
 import com.fun.funrpc.serializer.SerializerKeys;
 import lombok.Data;
@@ -59,4 +60,9 @@ public class RpcConfig {
      * NO：不重试
      */
     private String retryStrategy = RetryStrategyKeys.NO;
+
+    /**
+     * 容错策略
+     */
+    private String tolerantStrategy = TolerantStrategyKeys.FAIL_FAST;
 }

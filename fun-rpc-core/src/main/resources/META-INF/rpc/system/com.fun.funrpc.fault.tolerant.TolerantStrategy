@@ -1,0 +1,4 @@
+failBack=com.fun.funrpc.fault.tolerant.FailBackTolerantStrategy
+failFast=com.fun.funrpc.fault.tolerant.FailFastTolerantStrategy
+failOver=com.fun.funrpc.fault.tolerant.FailOverTolerantStrategy
+failSafe=com.fun.funrpc.fault.tolerant.FailSafeTolerantStrategy
