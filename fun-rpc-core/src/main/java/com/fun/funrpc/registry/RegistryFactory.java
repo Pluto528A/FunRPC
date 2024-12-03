@@ -26,7 +26,7 @@ public class RegistryFactory {
      * 获取注册中心对象实例
      * @return 注册中心对象
      */
-    public static Registry getInstace(String key) {
+    public static Registry getInstance(String key) {
         return SpiLoader.getInstance(Registry.class, key);
     }
 }
